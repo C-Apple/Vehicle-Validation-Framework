@@ -15,6 +15,13 @@ class Battery:
         else:
             self.percentage = max(0, self.percentage - amount)
 
+    #only use for tests
+    def set_battery_percentage(self, percentage):
+        if 0 <= percentage <= 100:
+            self.percentage = percentage
+        else:
+            raise ValueError("Battery percentage must be between 0 and 100")
+
     @property
     def dead(self):
         return self.percentage <= 0
