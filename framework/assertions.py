@@ -1,9 +1,46 @@
+from simulator import Vehicle
 
-
-def assert_vehicle_state(vehicle):
+def assert_doors_locked(vehicle: Vehicle):
     state = vehicle.get_state()
-    assert state["locked"] == False, "Vehicle should be unlocked by default"
-    assert state["awake"] == True, "Vehicle should be awake by default"
-    assert state["battery_percentage"] == 100, "Battery percentage should be 100% by default"
-    assert state["charging"] == False, "Vehicle should not be charging by default"
-    assert state["climate_control_on"] == False, "Climate control should be off by default"
+
+    assert state["doors_locked"]
+
+def assert_doors_unlocked(vehicle: Vehicle):
+    state = vehicle.get_state()
+
+    assert not state["doors_locked"]
+
+def assert_vehicle_awake(vehicle: Vehicle):
+    state = vehicle.get_state()
+
+    assert state["awake"]
+
+def assert_vehicle_asleep(vehicle: Vehicle):
+    state = vehicle.get_state()
+
+    assert not state["awake"]
+
+def assert_battery_percentage(vehicle: Vehicle, expected_percentage: float | int):
+    state = vehicle.get_state()
+
+    assert state["battery_percentage"] == expected_percentage
+
+def assert_charging(vehicle: Vehicle):
+    state = vehicle.get_state()
+
+    assert state["charging"]
+
+def assert_not_charging(vehicle: Vehicle):
+    state = vehicle.get_state()
+
+    assert not state["charging"]
+
+def assert_climate_control_on(vehicle: Vehicle):
+    state = vehicle.get_state()
+
+    assert state["climate_control_on"]
+
+def assert_climate_control_off(vehicle: Vehicle):
+    state = vehicle.get_state()
+
+    assert not state["climate_control_on"]
