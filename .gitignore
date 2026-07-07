@@ -14,6 +14,9 @@ reports/
 # VS Code
 .vscode/
 
+#various pycaches
+*.py[cod]
+
 # Coverage
 .coverage
 htmlcov/
