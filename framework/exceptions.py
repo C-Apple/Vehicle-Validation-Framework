@@ -6,6 +6,10 @@ class BatteryDeadException(VehicleException):
     """Raised when an operation cannot be performed because the vehicle's battery is dead."""
     pass
 
+class GearNotFoundException(VehicleException):
+    """Raised when an operation cannot be performed because the gear is not found."""
+    pass
+
 class VehicleLockedException(VehicleException):
     """Raised when an operation cannot be performed because the vehicle is locked."""
     pass

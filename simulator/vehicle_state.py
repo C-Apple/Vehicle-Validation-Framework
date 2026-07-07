@@ -114,9 +114,12 @@ class Vehicle:
 
         return {"message": "Vehicle has been reset to default state"}
     
+    
+    #TODO: transmission integration: gear shift and current gear status
 
+    #TODO: window integration & logic: venting logic, percentage open logic, etc.
 
     #fault injections
     def inject_fault(self, str):
-    #TODO
+    #TODO: Inject faults
         pass
