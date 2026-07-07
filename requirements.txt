@@ -1,0 +1,6 @@
+pytest
+pytest-html
+requests
+pydantic
+fastapi
+uvicorn
