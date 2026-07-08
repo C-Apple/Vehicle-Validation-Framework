@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 360" role="img" aria-labelledby="title desc">
+  <title id="title">Vehicle simulator side view</title>
+  <desc id="desc">A simplified side-view vehicle graphic used by the simulator console.</desc>
+  <defs>
+    <linearGradient id="body" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#2f6f73"/>
+      <stop offset="0.52" stop-color="#1f7a68"/>
+      <stop offset="1" stop-color="#155f51"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#d7eef1"/>
+      <stop offset="1" stop-color="#7fb7c1"/>
+    </linearGradient>
+  </defs>
+  <path d="M112 242c4-42 28-79 66-96l82-36c33-15 68-22 104-22h154c38 0 75 10 108 30l103 62 70 16c33 8 56 38 56 72v13H78v-9c0-15 12-28 27-29l7-1Z" fill="url(#body)"/>
+  <path d="M274 121h115v76H183l66-54c7-6 16-13 25-22Z" fill="url(#glass)"/>
+  <path d="M414 121h93c29 0 58 8 83 23l71 43c6 4 3 10-4 10H414v-76Z" fill="url(#glass)"/>
+  <path d="M402 112v104M684 195l-42 36M160 223h84M514 223h88M724 223h74" fill="none" stroke="#123d38" stroke-linecap="round" stroke-width="9" opacity=".45"/>
+  <path d="M89 281h768v21H89z" fill="#20312e"/>
+  <circle cx="257" cy="281" r="58" fill="#18211f"/>
+  <circle cx="257" cy="281" r="31" fill="#d7dfdc"/>
+  <circle cx="257" cy="281" r="12" fill="#65736f"/>
+  <circle cx="677" cy="281" r="58" fill="#18211f"/>
+  <circle cx="677" cy="281" r="31" fill="#d7dfdc"/>
+  <circle cx="677" cy="281" r="12" fill="#65736f"/>
+  <path d="M114 236h68c12 0 21 10 21 21v4H91c2-14 11-25 23-25ZM794 235h36c13 0 23 11 23 24v2h-82v-3c0-13 10-23 23-23Z" fill="#f2c94c"/>
+  <path d="M501 215h46" stroke="#eaf2ef" stroke-linecap="round" stroke-width="8" opacity=".75"/>
+</svg>

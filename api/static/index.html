@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Vehicle Simulator Console</title>
+    <link rel="stylesheet" href="/static/styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Vehicle Automation Framework</p>
+          <h1>Simulator Console</h1>
+        </div>
+        <div class="topbar-actions">
+          <button id="refreshButton" class="ghost-button" type="button">Refresh</button>
+          <button id="resetButton" class="danger-button" type="button">Reset</button>
+        </div>
+      </header>
+
+      <section class="status-layout">
+        <div class="vehicle-panel">
+          <div class="vehicle-visual">
+            <img src="/static/vehicle.svg" alt="Vehicle simulator side view">
+            <div class="state-badge lock-badge" id="lockBadge">Unlocked</div>
+            <div class="state-badge climate-badge" id="climateBadge">Climate off</div>
+            <div class="window-fill" id="windowFill"></div>
+          </div>
+          <div class="status-grid" id="statusGrid"></div>
+        </div>
+
+        <aside class="verification-panel">
+          <div class="panel-heading">
+            <h2>Daily Verification</h2>
+            <span id="verificationState" class="pill">Idle</span>
+          </div>
+          <button id="runVerificationButton" class="primary-button wide" type="button">
+            Run Smoke Sequence
+          </button>
+          <ol id="verificationSteps" class="step-list"></ol>
+        </aside>
+      </section>
+
+      <section class="controls-grid">
+        <article class="control-card">
+          <div class="card-heading">
+            <h2>Doors</h2>
+            <span id="doorState" class="pill">--</span>
+          </div>
+          <div class="button-row">
+            <button data-command="lock" type="button">Lock</button>
+            <button data-command="unlock" type="button">Unlock</button>
+          </div>
+        </article>
+
+        <article class="control-card">
+          <div class="card-heading">
+            <h2>Vehicle State</h2>
+            <span id="awakeState" class="pill">--</span>
+          </div>
+          <div class="button-row">
+            <button data-command="wake" type="button">Wake</button>
+            <button data-command="sleep" type="button">Sleep</button>
+          </div>
+        </article>
+
+        <article class="control-card">
+          <div class="card-heading">
+            <h2>Battery</h2>
+            <span id="batteryState" class="pill">--</span>
+          </div>
+          <div class="button-row">
+            <button data-command="charge-start" type="button">Start</button>
+            <button data-command="charge-step" type="button">Step</button>
+            <button data-command="charge-stop" type="button">Stop</button>
+          </div>
+        </article>
+
+        <article class="control-card">
+          <div class="card-heading">
+            <h2>Climate</h2>
+            <span id="climateState" class="pill">--</span>
+          </div>
+          <label class="field">
+            <span>Target</span>
+            <input id="targetTempInput" type="number" min="60" max="90" value="72">
+          </label>
+          <div class="button-row">
+            <button data-command="climate-start" type="button">Start</button>
+            <button data-command="climate-stop" type="button">Stop</button>
+          </div>
+        </article>
+
+        <article class="control-card">
+          <div class="card-heading">
+            <h2>Windows</h2>
+            <span id="windowState" class="pill">--</span>
+          </div>
+          <label class="field">
+            <span>Open</span>
+            <input id="windowInput" type="range" min="0" max="100" step="5" value="0">
+            <strong id="windowValue">0%</strong>
+          </label>
+          <div class="button-row">
+            <button data-command="window-open" type="button">Open</button>
+            <button data-command="window-set" type="button">Set</button>
+            <button data-command="window-vent" type="button">Vent</button>
+            <button data-command="window-close" type="button">Close</button>
+          </div>
+        </article>
+
+        <article class="control-card">
+          <div class="card-heading">
+            <h2>Transmission</h2>
+            <span id="gearState" class="pill">--</span>
+          </div>
+          <label class="field">
+            <span>Gear</span>
+            <select id="gearSelect">
+              <option value="P">Park</option>
+              <option value="R">Reverse</option>
+              <option value="N">Neutral</option>
+              <option value="D">Drive</option>
+              <option value="S">Sport</option>
+              <option value="L">Low</option>
+            </select>
+          </label>
+          <button data-command="gear-shift" class="wide" type="button">Shift</button>
+        </article>
+
+        <article class="control-card fault-card">
+          <div class="card-heading">
+            <h2>Fault Injection</h2>
+            <span id="faultState" class="pill">--</span>
+          </div>
+          <div class="field-pair">
+            <label class="field">
+              <span>Reading</span>
+              <select id="faultField">
+                <option value="battery_percentage">Battery</option>
+                <option value="window">Window</option>
+                <option value="target_temp">Target temp</option>
+                <option value="locked">Locked</option>
+                <option value="awake">Awake</option>
+                <option value="charging">Charging</option>
+                <option value="climate_control_on">Climate</option>
+                <option value="transmission">Transmission</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Value</span>
+              <input id="faultValue" type="text" value="120">
+            </label>
+          </div>
+          <div class="button-row">
+            <button data-command="fault-inject" type="button">Inject</button>
+            <button data-command="fault-clear" type="button">Clear All</button>
+          </div>
+        </article>
+
+        <article class="control-card event-card">
+          <div class="card-heading">
+            <h2>Event Log</h2>
+            <span id="lastUpdated" class="pill">--</span>
+          </div>
+          <div id="eventLog" class="event-log"></div>
+        </article>
+      </section>
+    </main>
+
+    <template id="statusTemplate">
+      <div class="status-card">
+        <span class="status-label"></span>
+        <strong class="status-value"></strong>
+      </div>
+    </template>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>
