@@ -102,3 +102,48 @@ def assert_window_open(vehicle: Vehicle):
 
     assert state["window"] > 0
 
+
+#failure injection status
+def assert_failure_injection_active(vehicle: Vehicle, expected: bool = True):
+    state = vehicle.get_state()
+
+    assert state["failure_injection_active"] is expected
+
+
+def assert_no_detected_failures(vehicle: Vehicle):
+    state = vehicle.get_state()
+
+    assert state["detected_failures"] == []
+
+
+def assert_detected_failure(vehicle: Vehicle, expected_field: str, expected_reason: str | None = None):
+    state = vehicle.get_state()
+    matching_failures = [
+        failure for failure in state["detected_failures"]
+        if failure["field"] == expected_field
+    ]
+
+    assert matching_failures, f"Expected detected failure for {expected_field}"
+    if expected_reason is not None:
+        assert matching_failures[0]["reason"] == expected_reason
+
+
+def assert_detected_failure_reason_contains(vehicle: Vehicle, expected_field: str, expected_reason_text: str):
+    state = vehicle.get_state()
+    matching_failures = [
+        failure for failure in state["detected_failures"]
+        if failure["field"] == expected_field
+    ]
+
+    assert matching_failures, f"Expected detected failure for {expected_field}"
+    assert expected_reason_text in matching_failures[0]["reason"]
+
+
+def assert_detected_failure_fields(vehicle: Vehicle, expected_fields: set[str]):
+    state = vehicle.get_state()
+
+    assert {failure["field"] for failure in state["detected_failures"]} == expected_fields
+
+
+def assert_battery_not_dead(vehicle: Vehicle):
+    assert vehicle.battery.dead is False

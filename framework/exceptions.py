@@ -37,3 +37,7 @@ class BatteryLowException(VehicleException):
 class VehicleNotChargingException(VehicleException):
     """Raised when an operation cannot be performed because the vehicle is not charging."""
     pass
+
+class InvalidFailureInjectionException(VehicleException):
+    """Raised when a failure injection cannot be applied to a vehicle reading."""
+    pass
