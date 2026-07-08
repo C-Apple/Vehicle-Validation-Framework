@@ -13,7 +13,6 @@ from framework.config import (
 )
 def test_default_vehicle_state():
     vehicle = Vehicle()
-    state = vehicle.get_state()
 
     a.assert_battery_percentage(vehicle, DEFAULT_BATTERY_PERCENTAGE)
     a.assert_awake_status(vehicle, DEFAULT_AWAKE_STATUS)
@@ -35,8 +34,6 @@ def test_reset_vehicle_state():
     vehicle.window.percentage_open = 50
 
     vehicle.reset()
-
-    state = vehicle.get_state()
 
     a.assert_battery_percentage(vehicle, DEFAULT_BATTERY_PERCENTAGE)
     a.assert_awake_status(vehicle, DEFAULT_AWAKE_STATUS)

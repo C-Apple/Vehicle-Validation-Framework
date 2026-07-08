@@ -6,7 +6,6 @@ def test_sleep_sets_vehicle_asleep():
 
     vehicle.sleep()
 
-    state = vehicle.get_state()
     a.assert_vehicle_asleep(vehicle)
 
 def test_wake_sets_vehicle_awake():
@@ -15,5 +14,4 @@ def test_wake_sets_vehicle_awake():
     vehicle.sleep()
     vehicle.wake()
 
-    state = vehicle.get_state()
     a.assert_vehicle_awake(vehicle)

@@ -9,7 +9,6 @@ def test_climate_turns_on():
     vehicle.battery.set_battery_percentage(80)
     vehicle.start_climate(72)
 
-    state = vehicle.get_state()
     a.assert_climate_control_on(vehicle)
     a.assert_target_temp(vehicle, 72)
 
