@@ -1,4 +1,4 @@
-from simulator import Vehicle
+from simulator.vehicle_state import Vehicle
 
 #locks
 def assert_doors_locked(vehicle: Vehicle):

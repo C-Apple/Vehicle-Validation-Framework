@@ -1,5 +1,4 @@
 from simulator.vehicle_state import Vehicle
-import framework.exceptions as ex
 import framework.assertions as a
 
 def test_open_window_changes_vehicle_state():

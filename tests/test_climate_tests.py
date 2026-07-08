@@ -1,6 +1,4 @@
 from simulator.vehicle_state import Vehicle
-from simulator.battery import Battery
-from simulator.climate_control import ClimateControl
 import pytest
 import framework.exceptions as ex
 import framework.assertions as a

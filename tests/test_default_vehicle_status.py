@@ -1,6 +1,5 @@
 from simulator.vehicle_state import Vehicle
 from simulator.transmission import Gear
-import framework.exceptions as ex
 import framework.assertions as a
 from framework.config import (
     DEFAULT_AWAKE_STATUS,

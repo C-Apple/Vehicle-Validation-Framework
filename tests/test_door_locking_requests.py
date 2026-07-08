@@ -1,4 +1,3 @@
-from simulator import battery
 from simulator.vehicle_state import Vehicle
 import pytest
 import framework.exceptions as ex
