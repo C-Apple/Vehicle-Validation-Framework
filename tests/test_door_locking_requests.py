@@ -2,20 +2,21 @@ from simulator import battery
 from simulator.vehicle_state import Vehicle
 import pytest
 import framework.exceptions as ex
+import framework.assertions as a
 
 def test_door_locking_request_changes_vehicle_state():
     vehicle = Vehicle()
     
     vehicle.unlock()
     vehicle.lock()
-    assert vehicle.doors_locked == True
+    a.assert_doors_locked(vehicle)
 
 def test_door_unlocking_request_changes_vehicle_state():
     vehicle = Vehicle()
 
     vehicle.lock()
     vehicle.unlock()
-    assert vehicle.doors_locked == False
+    a.assert_doors_unlocked(vehicle)
 
 def test_cannot_lock_when_battery_dead():
     vehicle = Vehicle()
@@ -34,15 +35,15 @@ def test_cannot_unlock_when_battery_dead():
     with pytest.raises(ex.BatteryDeadException):
         vehicle.unlock()
 
-    assert vehicle.door.door_locked_status is True
+    a.assert_doors_locked(vehicle)
 
 def test_unlocking_wakes_vehicle():
     vehicle = Vehicle()
     vehicle.lock()
     vehicle.sleep()
 
-    assert vehicle.awake == False
+    a.assert_vehicle_asleep(vehicle)
 
     vehicle.unlock()
 
-    assert vehicle.awake == True
+    a.assert_vehicle_awake(vehicle)

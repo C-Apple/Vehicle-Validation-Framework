@@ -3,6 +3,7 @@ from simulator.battery import Battery
 from simulator.climate_control import ClimateControl
 import pytest
 import framework.exceptions as ex
+import framework.assertions as a
 
 def test_climate_turns_on():
     vehicle = Vehicle()
@@ -11,8 +12,8 @@ def test_climate_turns_on():
     vehicle.start_climate(72)
 
     state = vehicle.get_state()
-    assert state["climate_control_on"] is True
-    assert state["target_temp"] == 72
+    a.assert_climate_control_on(vehicle)
+    a.assert_target_temp(vehicle, 72)
 
 def test_climate_rejects_invalid_temperature():
     vehicle = Vehicle()
@@ -26,12 +27,11 @@ def test_starting_climate_wakes_vehicle():
     vehicle.battery.set_battery_percentage(80)
     vehicle.sleep()
 
-    assert vehicle.awake == False
+    a.assert_vehicle_asleep(vehicle)
 
     vehicle.start_climate(72)
 
-    assert vehicle.awake == True
-
+    a.assert_vehicle_awake(vehicle)
 
 def test_climate_does_not_start_with_low_battery():
     vehicle = Vehicle()

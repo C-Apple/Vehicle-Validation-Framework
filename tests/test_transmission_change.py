@@ -1,13 +1,14 @@
 from simulator.vehicle_state import Vehicle
 from simulator.transmission import Gear
 import framework.exceptions as ex
+import framework.assertions as a
 
 def test_shift_gear():
     vehicle = Vehicle()
 
     vehicle.shift_gear(Gear.DRIVE)
 
-    assert vehicle.current_gear == Gear.DRIVE
+    a.assert_transmission_gear(vehicle, Gear.DRIVE)
 
 def test_shift_gear_with_dead_battery():
     vehicle = Vehicle()
@@ -24,7 +25,7 @@ def test_all_valid_gear_shifts():
 
     for gear in Gear:
         vehicle.shift_gear(gear)
-        assert vehicle.current_gear == gear
+        a.assert_transmission_gear(vehicle, gear)
 
 def test_shift_gear_with_invalid_gear():
     vehicle = Vehicle()
