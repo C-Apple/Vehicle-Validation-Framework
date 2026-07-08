@@ -1,6 +1,20 @@
-from simulator import battery, door, climate_control
-from framework.config import MIN_TEMP, MAX_TEMP, LOW_BATTERY_THRESHOLD, CHARGE_STEP_INTERVAL, DEFAULT_BATTERY_PERCENTAGE, DEFAULT_AWAKE_STATUS, DEFAULT_DOOR_LOCKED_STATUS, DEFAULT_CHARGING_STATUS, DEFAULT_CLIMATE_CONTROL_ON, DEFAULT_TARGET_TEMP
+from simulator import battery, door, climate_control, transmission, window
 import framework.exceptions as ex
+from framework.config import (
+    CHARGE_STEP_INTERVAL,
+    DEFAULT_BATTERY_PERCENTAGE,
+    MIN_TEMP,
+    MAX_TEMP,
+    LOW_BATTERY_THRESHOLD,
+    DEFAULT_AWAKE_STATUS,
+    DEFAULT_DOOR_LOCKED_STATUS,
+    DEFAULT_CHARGING_STATUS,
+    DEFAULT_CLIMATE_CONTROL_ON,
+    DEFAULT_TARGET_TEMP,
+    DEFAULT_TRANSMISSION_GEAR,
+    DEFAULT_WINDOW_PERCENTAGE_OPEN,
+    VENT_PERCENTAGE
+)
 
 class Vehicle:
     def __init__(self):
@@ -9,6 +23,8 @@ class Vehicle:
         self.awake = True
         self.door = door.Door()
         self.climate_control = climate_control.ClimateControl()
+        self.transmission = transmission.Transmission()
+        self.window = window.Window()
 
     def get_state(self):
         return {
@@ -17,7 +33,9 @@ class Vehicle:
             "battery_percentage": self.battery.percentage,
             "charging": self.battery.charging,
             "climate_control_on": self.climate_control.climate_control_on,
-            "target_temp": self.climate_control.target_temp
+            "target_temp": self.climate_control.target_temp,
+            "transmission": self.transmission.get_current_gear,
+            "window": self.window.percentage_open
 
             #default status:
             #locked: False
@@ -26,6 +44,7 @@ class Vehicle:
             #charging: False
             #climate_control_on: False
             #target_temp: None
+            #transmission: PARK
         }
     
     def lock(self):
@@ -95,14 +114,69 @@ class Vehicle:
     def stop_climate(self):
         self.climate_control.stop_climate()
         return {"message": "Climate control is now off"}
+
+    def shift_gear(self, gear):
+        # check if battery dead before shifting gear
+        if self.battery.dead:
+            raise ex.BatteryDeadException("Cannot shift gear: Battery is dead")
+        
+        self.transmission.shift_gear(gear)
+        return {"message": "Transmission gear shifted to {}".format(gear)}
     
-    def vehicle_reset(self):
+    @property
+    def current_gear(self):
+        return self.transmission.get_current_gear
+
+    def set_window_percentage(self, percentage):
+        # check if battery dead before setting window percentage
+        if self.battery.dead:
+            raise ex.BatteryDeadException("Cannot set window percentage: Battery is dead")
+        
+        self.window.set_window_percentage(percentage)
+        return {"message": "Window open percentage set to {}".format(percentage)}
+    
+    def close_window(self):
+        # check if battery dead before closing window
+        if self.battery.dead:
+            raise ex.BatteryDeadException("Cannot close window: Battery is dead")
+        
+        self.window.close_window()
+        return {"message": "Window is now closed"}
+
+    def open_window(self):
+        # check if battery dead before opening window
+        if self.battery.dead:
+            raise ex.BatteryDeadException("Cannot open window: Battery is dead")
+        
+        self.window.open_window()
+        return {"message": "Window is now open"}
+    
+    def vent_window(self):
+        # check if battery dead before venting window
+        if self.battery.dead:
+            raise ex.BatteryDeadException("Cannot vent window: Battery is dead")
+        
+        self.window.set_window_percentage(VENT_PERCENTAGE)
+        return {"message": "Window is now vented"}
+    
+    @property
+    def window_percentage_open(self):
+        return self.window.percentage_open
+
+    #fault injections
+    def inject_fault(self, str):
+    #TODO: Inject faults
+        pass
+    
+    def reset(self):
         self.battery.set_battery_percentage(DEFAULT_BATTERY_PERCENTAGE)
         self.awake = DEFAULT_AWAKE_STATUS
         self.battery.charging = DEFAULT_CHARGING_STATUS
         self.door.door_locked_status = DEFAULT_DOOR_LOCKED_STATUS
         self.climate_control.target_temp = DEFAULT_TARGET_TEMP
         self.climate_control.climate_control_on = DEFAULT_CLIMATE_CONTROL_ON
+        self.transmission.current_gear = DEFAULT_TRANSMISSION_GEAR
+        self.window.percentage_open = DEFAULT_WINDOW_PERCENTAGE_OPEN
 
         #default status:
             #locked: False
@@ -111,15 +185,7 @@ class Vehicle:
             #charging: False
             #climate_control_on: False
             #target_temp: None
+            #transmission: PARK
+            #window: 0% open
 
         return {"message": "Vehicle has been reset to default state"}
-    
-    
-    #TODO: transmission integration: gear shift and current gear status
-
-    #TODO: window integration & logic: venting logic, percentage open logic, etc.
-
-    #fault injections
-    def inject_fault(self, str):
-    #TODO: Inject faults
-        pass

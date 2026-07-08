@@ -1,6 +1,5 @@
 from simulator.vehicle_state import Vehicle
 
-
 def test_sleep_sets_vehicle_asleep():
     vehicle = Vehicle()
 

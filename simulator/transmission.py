@@ -15,7 +15,7 @@ class Transmission:
 
     def shift_gear(self, gear: Gear):
         if not isinstance(gear, Gear):
-            raise ex.GearNotFoundException("Invalid gear value")
+            raise ex.InvalidGearException("Invalid gear value")
         self.current_gear = gear
         return {"message": f"Shifted to {gear.value}"}
     

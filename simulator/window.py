@@ -18,11 +18,14 @@ class Window:
         self.window_open = False
         self.percentage_open = 0
         return {"message": "Window closed"}
+    
+    def set_window_percentage(self, percentage):
+        if not (0 <= percentage <= 100):
+            raise ex.WindowPercentageException("Percentage must be between 0 and 100")
+        self.percentage_open = percentage
+        self.window_open = percentage > 0
+        return {"message": f"Window set to {percentage}% open"}
 
     @property
     def is_window_open(self):
         return self.window_open
-
-    @property
-    def window_open_percentage(self):
-        return self.percentage_open
