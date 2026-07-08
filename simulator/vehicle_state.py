@@ -17,6 +17,13 @@ from framework.config import (
 )
 
 class Vehicle:
+    _READING_LIMITS = {
+        "battery_percentage": (0, 100),
+        "window": (0, 100),
+        "target_temp": (MIN_TEMP, MAX_TEMP),
+    }
+    _BOOLEAN_READINGS = {"locked", "awake", "charging", "climate_control_on"}
+
     def __init__(self):
         #battery contains battery_percentage and charging status
         self.battery = battery.Battery()
@@ -25,8 +32,10 @@ class Vehicle:
         self.climate_control = climate_control.ClimateControl()
         self.transmission = transmission.Transmission()
         self.window = window.Window()
+        self._failure_injections = {}
+        self._last_detected_failures = []
 
-    def get_state(self):
+    def _raw_state(self):
         return {
             "locked": self.door.door_locked_status,
             "awake": self.awake,
@@ -36,16 +45,46 @@ class Vehicle:
             "target_temp": self.climate_control.target_temp,
             "transmission": self.transmission.get_current_gear,
             "window": self.window.percentage_open
-
-            #default status:
-            #locked: False
-            #awake: True
-            #battery_percentage: 100
-            #charging: False
-            #climate_control_on: False
-            #target_temp: None
-            #transmission: PARK
         }
+
+    def _safe_reading(self, field, value, known_good):
+        if field in self._BOOLEAN_READINGS and not isinstance(value, bool):
+            return known_good, f"{field} reading must be a boolean"
+
+        if field in self._READING_LIMITS:
+            if value is None and field == "target_temp":
+                return value, None
+            if not isinstance(value, (int, float)) or isinstance(value, bool):
+                return known_good, f"{field} reading must be numeric"
+            minimum, maximum = self._READING_LIMITS[field]
+            if value < minimum or value > maximum:
+                return known_good, f"{field} reading {value} is outside safe range {minimum}-{maximum}"
+
+        if field == "transmission" and not isinstance(value, transmission.Gear):
+            return known_good, "transmission reading must be a Gear value"
+
+        return value, None
+
+    def get_state(self):
+        raw_state = self._raw_state()
+        reported_state = raw_state.copy()
+        detected_failures = []
+
+        for field, injected_value in self._failure_injections.items():
+            safe_value, failure = self._safe_reading(field, injected_value, raw_state[field])
+            reported_state[field] = safe_value
+            if failure:
+                detected_failures.append({
+                    "field": field,
+                    "injected_value": injected_value,
+                    "safe_value": safe_value,
+                    "reason": failure,
+                })
+
+        self._last_detected_failures = detected_failures
+        reported_state["failure_injection_active"] = bool(self._failure_injections)
+        reported_state["detected_failures"] = detected_failures
+        return reported_state
     
     def lock(self):
         # check if battery dead before locking
@@ -164,10 +203,30 @@ class Vehicle:
         return self.window.percentage_open
 
     #fault injections
-    def inject_fault(self, str):
-    #TODO: Inject faults
-        pass
-    
+    def inject_fault(self, field, value=None):
+        raw_state = self._raw_state()
+        if field not in raw_state:
+            raise ex.InvalidFailureInjectionException("Unknown failure injection field: {}".format(field))
+        self._failure_injections[field] = value
+        return {"message": "Failure injection set for {}".format(field)}
+
+    def clear_fault(self, field=None):
+        if field is None:
+            self._failure_injections.clear()
+            self._last_detected_failures = []
+            return {"message": "All failure injections cleared"}
+
+        if field not in self._failure_injections:
+            raise ex.InvalidFailureInjectionException("No failure injection is set for {}".format(field))
+
+        del self._failure_injections[field]
+        self._last_detected_failures = []
+        return {"message": "Failure injection cleared for {}".format(field)}
+
+    @property
+    def detected_failures(self):
+        return self._last_detected_failures
+
     def reset(self):
         self.battery.set_battery_percentage(DEFAULT_BATTERY_PERCENTAGE)
         self.awake = DEFAULT_AWAKE_STATUS
@@ -177,6 +236,8 @@ class Vehicle:
         self.climate_control.climate_control_on = DEFAULT_CLIMATE_CONTROL_ON
         self.transmission.current_gear = DEFAULT_TRANSMISSION_GEAR
         self.window.percentage_open = DEFAULT_WINDOW_PERCENTAGE_OPEN
+        self._failure_injections.clear()
+        self._last_detected_failures = []
 
         #default status:
             #locked: False
