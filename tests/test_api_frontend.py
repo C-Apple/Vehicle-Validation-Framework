@@ -45,3 +45,58 @@ def test_legacy_awake_and_charge_routes_still_work():
     assert routes.awake_vehicle()["state"]["awake"] is True
     assert routes.charge_vehicle()["state"]["charging"] is True
     assert routes.stop_charge_vehicle()["state"]["charging"] is False
+
+
+def test_speedrun_frontend_assets_are_present():
+    html = Path(STATIC_DIR / "index.html").read_text(encoding="utf-8")
+    js = Path(STATIC_DIR / "app.js").read_text(encoding="utf-8")
+    css = Path(STATIC_DIR / "styles.css").read_text(encoding="utf-8")
+
+    assert "Wikipedia Speedrun" in html
+    assert "speedrunStrengthGraph" in html
+    assert "performance.now()" in js
+    assert "requestAnimationFrame" in js
+    assert "strength-bar" in css
+
+
+def test_speedrun_endpoint_returns_cached_wikipedia_links(monkeypatch):
+    from api import speedrun
+
+    speedrun._cached_links.cache_clear()
+
+    class DummyResponse:
+        status_code = 200
+        ok = True
+        headers = {}
+
+        def json(self):
+            return {
+                "query": {
+                    "pages": [
+                        {
+                            "links": [
+                                {"title": "Electric car"},
+                                {"title": "Battery electric vehicle"},
+                            ]
+                        }
+                    ]
+                }
+            }
+
+    calls = []
+
+    def fake_get(*args, **kwargs):
+        calls.append((args, kwargs))
+        return DummyResponse()
+
+    monkeypatch.setattr(speedrun.requests, "get", fake_get)
+    monkeypatch.setattr(speedrun.time, "sleep", lambda *_: None)
+
+    first = speedrun.wikipedia_links("Electric vehicle")
+    second = speedrun.wikipedia_links("Electric vehicle")
+
+    assert len(calls) == 1
+    assert first == second
+    assert first[0]["title"] == "Electric car"
+    assert 0 <= first[0]["score"] <= 1
+    assert calls[0][1]["headers"]["User-Agent"]

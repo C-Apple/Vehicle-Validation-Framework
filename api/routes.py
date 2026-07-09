@@ -7,6 +7,7 @@ from pydantic import BaseModel
 import framework.exceptions as vehicle_exceptions
 from simulator.transmission import Gear
 from simulator.vehicle_state import Vehicle
+from .speedrun import wikipedia_links
 
 
 router = APIRouter(prefix="/vehicle", tags=["vehicle"])
@@ -28,6 +29,10 @@ class GearRequest(BaseModel):
 class FaultRequest(BaseModel):
     field: str
     value: Any = None
+
+
+class WikipediaLinksRequest(BaseModel):
+    page: str
 
 
 def _serialize_value(value):
@@ -175,3 +180,9 @@ def clear_fault(field: str):
 @router.post("/reset")
 def reset_vehicle():
     return _run_command(vehicle_state.reset)
+
+
+@router.post("/speedrun/wikipedia-links")
+def fetch_wikipedia_links(request: WikipediaLinksRequest):
+    links = wikipedia_links(request.page)
+    return {"page": request.page.strip(), "links": links}

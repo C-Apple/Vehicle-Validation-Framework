@@ -26,8 +26,17 @@ const faultValue = document.querySelector("#faultValue");
 const verificationSteps = document.querySelector("#verificationSteps");
 const runVerificationButton = document.querySelector("#runVerificationButton");
 const verificationState = document.querySelector("#verificationState");
+const speedrunPageInput = document.querySelector("#speedrunPageInput");
+const speedrunState = document.querySelector("#speedrunState");
+const speedrunTimer = document.querySelector("#speedrunTimer");
+const speedrunStartButton = document.querySelector("#speedrunStartButton");
+const speedrunStopButton = document.querySelector("#speedrunStopButton");
+const speedrunResults = document.querySelector("#speedrunResults");
+const speedrunStrengthGraph = document.querySelector("#speedrunStrengthGraph");
 
 let currentState = null;
+let speedrunStartTime = 0;
+let speedrunTimerFrame = null;
 
 function formatBoolean(value, truthy, falsy) {
   return value ? truthy : falsy;
@@ -191,6 +200,106 @@ async function handleCommand(event) {
   }
 }
 
+function formatDuration(milliseconds) {
+  const totalTenths = Math.floor(milliseconds / 100);
+  const minutes = Math.floor(totalTenths / 600);
+  const seconds = Math.floor((totalTenths % 600) / 10);
+  const tenths = totalTenths % 10;
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}.${tenths}`;
+}
+
+function tickSpeedrunTimer() {
+  speedrunTimer.textContent = formatDuration(performance.now() - speedrunStartTime);
+  speedrunTimerFrame = requestAnimationFrame(tickSpeedrunTimer);
+}
+
+function startSpeedrunTimer() {
+  stopSpeedrunTimer(false);
+  speedrunStartTime = performance.now();
+  speedrunTimer.textContent = "00:00.0";
+  speedrunTimerFrame = requestAnimationFrame(tickSpeedrunTimer);
+}
+
+function stopSpeedrunTimer(markStopped = true) {
+  if (speedrunTimerFrame !== null) {
+    cancelAnimationFrame(speedrunTimerFrame);
+    speedrunTimerFrame = null;
+  }
+  if (markStopped) {
+    speedrunState.textContent = "Stopped";
+    speedrunState.className = "pill";
+  }
+}
+
+function renderSpeedrunResults(links) {
+  speedrunResults.replaceChildren();
+  speedrunStrengthGraph.replaceChildren();
+
+  if (!links.length) {
+    const empty = document.createElement("li");
+    empty.textContent = "No linked pages were returned.";
+    speedrunResults.appendChild(empty);
+    return;
+  }
+
+  links.forEach((link) => {
+    const result = document.createElement("li");
+    const anchor = document.createElement("a");
+    anchor.href = link.url;
+    anchor.target = "_blank";
+    anchor.rel = "noreferrer";
+    anchor.textContent = link.title;
+    result.appendChild(anchor);
+    speedrunResults.appendChild(result);
+
+    const row = document.createElement("div");
+    row.className = "strength-row";
+    const value = document.createElement("span");
+    value.className = "strength-value";
+    value.textContent = Number(link.score).toFixed(2);
+    const track = document.createElement("div");
+    track.className = "strength-track";
+    const bar = document.createElement("div");
+    bar.className = "strength-bar";
+    bar.style.width = `${Math.max(0, Math.min(Number(link.score), 1)) * 100}%`;
+    bar.style.setProperty("--score", Math.max(0, Math.min(Number(link.score), 1)));
+    track.appendChild(bar);
+    row.append(value, track);
+    speedrunStrengthGraph.appendChild(row);
+  });
+}
+
+async function runSpeedrun() {
+  const page = speedrunPageInput.value.trim();
+  if (!page) {
+    addEvent("Enter a Wikipedia page title before starting a speedrun", true);
+    return;
+  }
+
+  speedrunStartButton.disabled = true;
+  speedrunState.textContent = "Running";
+  speedrunState.className = "pill warn";
+  startSpeedrunTimer();
+
+  try {
+    const payload = await requestJson("/vehicle/speedrun/wikipedia-links", {
+      method: "POST",
+      body: JSON.stringify({ page }),
+    });
+    renderSpeedrunResults(payload.links);
+    speedrunState.textContent = `Loaded ${payload.links.length}`;
+    speedrunState.className = "pill ok";
+    addEvent(`Fetched ${payload.links.length} Wikipedia links for ${payload.page}`);
+  } catch (error) {
+    speedrunState.textContent = "Failed";
+    speedrunState.className = "pill bad";
+    addEvent(error.message, true);
+  } finally {
+    stopSpeedrunTimer(false);
+    speedrunStartButton.disabled = false;
+  }
+}
+
 function setVerificationStep(index, tone) {
   const item = verificationSteps.children[index];
   if (item) item.className = tone;
@@ -254,6 +363,8 @@ document.addEventListener("click", handleCommand);
 document.querySelector("#refreshButton").addEventListener("click", () => refreshState("State refreshed").catch((error) => addEvent(error.message, true)));
 document.querySelector("#resetButton").addEventListener("click", () => runCommand("reset", "Vehicle reset").catch((error) => addEvent(error.message, true)));
 runVerificationButton.addEventListener("click", runVerification);
+speedrunStartButton.addEventListener("click", runSpeedrun);
+speedrunStopButton.addEventListener("click", () => stopSpeedrunTimer(true));
 windowInput.addEventListener("input", () => {
   windowValue.textContent = `${windowInput.value}%`;
 });

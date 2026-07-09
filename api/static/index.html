@@ -159,6 +159,33 @@
           </div>
         </article>
 
+
+        <article class="control-card speedrun-card">
+          <div class="card-heading">
+            <h2>Wikipedia Speedrun</h2>
+            <span id="speedrunState" class="pill">Ready</span>
+          </div>
+          <label class="field">
+            <span>Starting page</span>
+            <input id="speedrunPageInput" type="text" value="Electric vehicle" placeholder="Wikipedia page title">
+          </label>
+          <div class="speedrun-timer" id="speedrunTimer">00:00.0</div>
+          <div class="button-row">
+            <button id="speedrunStartButton" class="primary-button" type="button">Fetch Links</button>
+            <button id="speedrunStopButton" type="button">Stop Timer</button>
+          </div>
+          <div class="speedrun-results-layout">
+            <div>
+              <h3>Similar Results</h3>
+              <ol id="speedrunResults" class="speedrun-results"></ol>
+            </div>
+            <div>
+              <h3>Strength</h3>
+              <div id="speedrunStrengthGraph" class="strength-graph"></div>
+            </div>
+          </div>
+        </article>
+
         <article class="control-card event-card">
           <div class="card-heading">
             <h2>Event Log</h2>
