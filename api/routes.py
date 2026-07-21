@@ -8,10 +8,8 @@ import framework.exceptions as vehicle_exceptions
 from simulator.transmission import Gear
 from simulator.vehicle_state import Vehicle
 
-
 router = APIRouter(prefix="/vehicle", tags=["vehicle"])
 vehicle_state = Vehicle()
-
 
 class ClimateRequest(BaseModel):
     target_temp: int = 72
